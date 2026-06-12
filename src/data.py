@@ -1,6 +1,49 @@
 import numpy as np
 import pandas as pd
 
+
+def load_real_fraud_data():
+    """
+    Loads the real Credit Card Fraud Detection dataset from OpenML.
+    Dataset: 284,807 European credit card transactions from Sept 2013.
+    Features: V1-V28 (PCA-transformed), Time, Amount.
+    Target: Class (0=Legitimate, 1=Fraud). Fraud rate: 0.17%.
+    """
+    from sklearn.datasets import fetch_openml
+
+    print("Downloading Credit Card Fraud dataset from OpenML (first run may take a minute)...")
+    data = fetch_openml(name='creditcard', version=1, as_frame=True, parser='auto')
+    df = data.frame
+
+    print(f"  Raw dataset shape: {df.shape}")
+    print(f"  Columns: {list(df.columns)}")
+
+    # Build a case-insensitive column mapping for robustness
+    col_map = {c.lower(): c for c in df.columns}
+
+    # Rename target column → is_fraud
+    target_col = col_map.get('class')
+    if target_col and target_col != 'is_fraud':
+        df = df.rename(columns={target_col: 'is_fraud'})
+    df['is_fraud'] = df['is_fraud'].astype(int)
+
+    # Rename Amount → amount
+    amount_col = col_map.get('amount')
+    if amount_col and amount_col != 'amount':
+        df = df.rename(columns={amount_col: 'amount'})
+
+    # Rename Time → timestamp
+    time_col = col_map.get('time')
+    if time_col:
+        df = df.rename(columns={time_col: 'timestamp'})
+    else:
+        # If no Time column exists, create a sequential timestamp
+        print("  Warning: No 'Time' column found; creating sequential timestamps.")
+        df['timestamp'] = np.arange(len(df), dtype=float)
+
+    return df
+
+
 def generate_synthetic_fraud_data(num_samples=10000, fraud_rate=0.005, seed=42):
     """
     Generates a highly imbalanced credit card fraud transaction dataset
@@ -98,3 +141,33 @@ def temporal_train_test_split(df, test_ratio=0.25):
     test_df = df_sorted.iloc[split_idx:].reset_index(drop=True)
     
     return train_df, test_df
+
+
+def load_real_fraud_data():
+    """
+    Loads the real Credit Card Fraud Detection dataset from OpenML.
+    Dataset: 284,807 European credit card transactions from Sept 2013.
+    Features: V1-V28 (PCA-transformed), Amount.
+    Target: Class (0=Legitimate, 1=Fraud). Fraud rate: 0.17%.
+    """
+    from sklearn.datasets import fetch_openml
+    import numpy as np
+    
+    print("Downloading Credit Card Fraud dataset from OpenML (first run may take a minute)...")
+    data = fetch_openml(name='creditcard', version=1, as_frame=True, parser='auto')
+    df = data.frame
+    
+    # Rename columns to match our convention
+    df = df.rename(columns={'Class': 'is_fraud'})
+    df['is_fraud'] = df['is_fraud'].astype(int)
+    
+    # Rename 'Amount' to 'amount' for consistency
+    df = df.rename(columns={'Amount': 'amount'})
+    
+    # The OpenML version 1 drops the 'Time' column, so we add a synthetic timestamp
+    # to maintain compatibility with our temporal_train_test_split.
+    df['timestamp'] = np.arange(len(df))
+    
+    return df
+
+

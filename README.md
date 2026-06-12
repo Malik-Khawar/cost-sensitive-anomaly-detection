@@ -1,6 +1,6 @@
 # 🛡️ Cost-Sensitive High-Dimensional Anomaly Detection
 
-This repository contains a standalone **Cost-Sensitive Anomaly Detection** pipeline built with **Scikit-learn, Imbalanced-learn, and Category Encoders**.
+This repository contains a standalone **Cost-Sensitive Anomaly Detection** pipeline built with **Scikit-learn, Imbalanced-learn, and Category Encoders**. It supports both synthetic data and the **real Credit Card Fraud Detection dataset** (284,807 European credit card transactions from September 2013, sourced from OpenML).
 
 In real-world applications like financial fraud detection, statistical metrics (e.g., F1-score or PR-AUC) do not tell the whole story. Asymmetrical business costs exist:
 - **False Negatives (Missed Fraud)**: Extremely expensive; costs the transaction amount plus chargeback fees.
@@ -14,12 +14,13 @@ This project implements a framework that optimizes machine learning decision thr
 ## 🚀 Key Features
 
 1. **Custom Financial Cost Matrix**: Dynamically computes business utility based on actual transaction values and user friction costs.
-2. **High-Cardinality Target Encoding**: Handles categorical identifiers (`merchant_id`, `device_id`) using regularized target encoding to prevent overfitting.
-3. **Advanced Class Imbalance Handling**: Compares pipeline architectures:
+2. **Real Dataset Support**: Download and evaluate on the real [Credit Card Fraud Detection dataset](https://www.openml.org/d/1597) with 284K transactions and 0.17% fraud rate using the `--real-data` flag.
+3. **High-Cardinality Target Encoding**: Handles categorical identifiers (`merchant_id`, `device_id`) using regularized target encoding to prevent overfitting (synthetic data mode).
+4. **Advanced Class Imbalance Handling**: Compares pipeline architectures:
    - Class-weighted Logistic Regression.
    - SMOTE (Synthetic Minority Over-sampling Technique) combined with Random Forest.
    - Cost-Sensitive Random Forest with class-priority weighting.
-4. **Decision Threshold Tuning for Savings**: Computes optimal decision thresholds to maximize net financial savings relative to a "do-nothing" baseline.
+5. **Decision Threshold Tuning for Savings**: Computes optimal decision thresholds to maximize net financial savings relative to a "do-nothing" baseline.
 
 ---
 
@@ -62,7 +63,7 @@ Evaluating on a synthetic dataset of 10,000 transactions (0.53% train fraud rate
 
 ```text
 ├── src/
-│   ├── data.py         # Highly imbalanced synthetic fraud generator
+│   ├── data.py         # Synthetic fraud generator + real dataset loader (OpenML)
 │   ├── features.py     # Preprocessing pipeline (target encoder, scaling, PCA)
 │   ├── cost_matrix.py  # Asymmetric financial utility and savings equations
 │   ├── models.py       # Scikit-learn and Imbalanced-learn model pipelines
@@ -85,7 +86,15 @@ pip install -r requirements.txt
 ```
 
 ### Run Evaluation
-To run the models, optimize thresholds, and output savings stats:
+
+**Synthetic data** (default):
 ```bash
 python main.py --samples 10000
 ```
+
+**Real Credit Card Fraud dataset** (downloads from OpenML on first run):
+```bash
+python main.py --real-data
+```
+
+The real dataset contains 284,807 transactions with 28 PCA-transformed features (V1-V28), plus Time and Amount. When `--real-data` is used, a 50,000-row subsample (sorted by time) is used for reasonable runtime.
