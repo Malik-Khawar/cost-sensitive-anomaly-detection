@@ -1,0 +1,13 @@
+[project]
+name = "project3_anomaly_detection"
+version = "0.1.0"
+description = "Cost-Sensitive High-Dimensional Anomaly Detection"
+requires-python = ">=3.14"
+dependencies = [
+    "scikit-learn",
+    "imbalanced-learn",
+    "numpy",
+    "pandas",
+    "matplotlib",
+    "category-encoders",
+]
