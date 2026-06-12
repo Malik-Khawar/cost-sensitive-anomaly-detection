@@ -45,7 +45,11 @@ def run_project3(num_samples=10000, fraud_rate=0.005, seed=42, use_real_data=Fal
     amounts_test = test_df["amount"].values
     
     # Initialize Business Evaluator
-    evaluator = FinancialCostEvaluator(c_verify=10.0, c_irritate=25.0, c_fee=15.0)
+    evaluator = FinancialCostEvaluator(
+        c_verify=10.0,
+        c_irritate=5.0,  # Lowered from $25 to $5 (e.g., SMS verification instead of blocking card)
+        c_fee=15.0
+    )
     
     # 3. Build pipelines
     if use_real_data:
@@ -57,22 +61,26 @@ def run_project3(num_samples=10000, fraud_rate=0.005, seed=42, use_real_data=Fal
         from sklearn.pipeline import Pipeline as SkPipeline
         from imblearn.over_sampling import SMOTE
         from imblearn.pipeline import Pipeline as ImbPipeline
+        import lightgbm as lgb
         
         models_dict = {
-            "Balanced Logistic Regression": SkPipeline(steps=[
-                ('scaler', StandardScaler()),
-                ('classifier', LogisticRegression(
-                    class_weight='balanced',
-                    max_iter=1000,
-                    random_state=42
-                ))
-            ]),
-            "SMOTE + Random Forest": ImbPipeline(steps=[
+            "SMOTE + LightGBM": ImbPipeline(steps=[
                 ('scaler', StandardScaler()),
                 ('smote', SMOTE(sampling_strategy=0.1, random_state=42)),
-                ('classifier', RandomForestClassifier(
-                    n_estimators=100,
-                    max_depth=12,
+                ('classifier', lgb.LGBMClassifier(
+                    n_estimators=300,
+                    max_depth=6,
+                    learning_rate=0.05,
+                    random_state=42,
+                    n_jobs=-1
+                ))
+            ]),
+            "Cost-Sensitive LightGBM": SkPipeline(steps=[
+                ('scaler', StandardScaler()),
+                ('classifier', lgb.LGBMClassifier(
+                    n_estimators=300,
+                    learning_rate=0.05,
+                    scale_pos_weight=50.0,
                     random_state=42,
                     n_jobs=-1
                 ))
@@ -80,9 +88,9 @@ def run_project3(num_samples=10000, fraud_rate=0.005, seed=42, use_real_data=Fal
             "Cost-Sensitive Random Forest": SkPipeline(steps=[
                 ('scaler', StandardScaler()),
                 ('classifier', RandomForestClassifier(
-                    n_estimators=100,
-                    max_depth=12,
-                    class_weight={0: 1.0, 1: 25.0},
+                    n_estimators=300,
+                    max_depth=None,
+                    class_weight="balanced",
                     random_state=42,
                     n_jobs=-1
                 ))

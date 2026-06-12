@@ -4,3 +4,4 @@ numpy>=1.22.0
 pandas>=1.4.0
 matplotlib>=3.5.0
 category-encoders>=2.5.0
+lightgbm>=0.9.0

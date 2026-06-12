@@ -17,9 +17,9 @@ This project implements a framework that optimizes machine learning decision thr
 2. **Real Dataset Support**: Download and evaluate on the real [Credit Card Fraud Detection dataset](https://www.openml.org/d/1597) with 284K transactions and 0.17% fraud rate using the `--real-data` flag.
 3. **High-Cardinality Target Encoding**: Handles categorical identifiers (`merchant_id`, `device_id`) using regularized target encoding to prevent overfitting (synthetic data mode).
 4. **Advanced Class Imbalance Handling**: Compares pipeline architectures:
-   - Class-weighted Logistic Regression.
-   - SMOTE (Synthetic Minority Over-sampling Technique) combined with Random Forest.
-   - Cost-Sensitive Random Forest with class-priority weighting.
+   - SMOTE (Synthetic Minority Over-sampling Technique) combined with LightGBM.
+   - Cost-Sensitive LightGBM with extreme class-priority weighting.
+   - Cost-Sensitive Random Forest with deep trees and class-priority weighting.
 5. **Decision Threshold Tuning for Savings**: Computes optimal decision thresholds to maximize net financial savings relative to a "do-nothing" baseline.
 
 ---
@@ -47,11 +47,11 @@ Evaluating on a synthetic dataset of 10,000 transactions (0.53% train fraud rate
 
 | Model Name | ROC-AUC | PR-AUC | Optimal Threshold | Optimal Savings | Optimal Recall |
 | :--- | :---: | :---: | :---: | :---: | :---: |
-| **Balanced Logistic Regression** | `0.9979` | `0.8801` | `0.6262` | **\$21,912.31** | `92.31%` |
-| **SMOTE + Random Forest** | `0.9990` | `0.8433` | `0.3031` | **\$22,162.31** | `92.31%` |
-| **Cost-Sensitive Random Forest** | `0.9993` | `0.8888` | `0.0607` | **\$22,187.30** | `100.00%` |
+| **SMOTE + LightGBM** | `0.9722` | `0.7865` | `0.1011` | **\$12,357.94** | `79.63%` |
+| **Cost-Sensitive LightGBM** | `0.8567` | `0.0193` | `0.6969` | **\$-3,236.58** | `75.00%` |
+| **Cost-Sensitive Random Forest** | `0.9531` | `0.8274` | `0.0506` | **\$12,674.33** | `85.19%` |
 
-*The Cost-Sensitive Random Forest saves **97.24%** of the potential fraud loss by blocking all 13 fraud transactions at its optimal threshold.*
+*Note: The Cost-Sensitive Random Forest achieves the highest net savings by carefully balancing the $15 chargeback fee of missed fraud against the $5 customer irritation cost of false positives (e.g. SMS verification).*
 
 ### Saved Outputs
 - **Savings Curve (`results/savings_threshold_curve.png`)**: Charts net financial savings as a function of the probability threshold, showing how statistical cuts (like 0.50) are financially sub-optimal.
