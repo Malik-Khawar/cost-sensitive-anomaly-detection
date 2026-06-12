@@ -97,4 +97,4 @@ python main.py --samples 10000
 python main.py --real-data
 ```
 
-The real dataset contains 284,807 transactions with 28 PCA-transformed features (V1-V28), plus Time and Amount. When `--real-data` is used, a 50,000-row subsample (sorted by time) is used for reasonable runtime.
+The real dataset contains 284,807 transactions with 28 PCA-transformed features (V1-V28), plus Time and Amount. When `--real-data` is used, the full dataset is processed (sorted chronologically).

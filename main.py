@@ -22,11 +22,9 @@ def run_project3(num_samples=10000, fraud_rate=0.005, seed=42, use_real_data=Fal
         print("Loading real Credit Card Fraud dataset...")
         df = load_real_fraud_data()
         
-        # Sort by timestamp and subsample to keep runtime reasonable
+        # Sort by timestamp
         df = df.sort_values("timestamp").reset_index(drop=True)
-        subsample_size = min(50000, len(df))
-        df = df.iloc[:subsample_size].reset_index(drop=True)
-        print(f"Subsampled to {subsample_size} rows (sorted by timestamp).")
+        print("Using the full dataset.")
     else:
         # --- Synthetic data path ---
         print("Generating highly imbalanced synthetic fraud transaction dataset...")
